@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Static Template</title>
+    <style>
+      #text {
+        outline: none;
+      }
+      #text::highlight(selected) {
+        color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <p contenteditable id="text"></p>
+    <script>
+      const textEl = document.querySelector("#text");
+      textEl.innerText = `This is a static template. There is no bundler or bundling involved! You are welcome!`;
+
+      const segmenter = new Intl.Segmenter("en", { granularity: "sentence" });
+
+      document.addEventListener("selectionchange", (e) => {
+        const target = document.activeElement;
+        const segments = [...segmenter.segment(target.innerText)];
+        const index = segments.findIndex(
+          ({ index }) => index > window.getSelection().anchorOffset
+        );
+
+        const segment = segments[(index === -1 ? segments.length : index) - 1];
+
+        console.log(segment);
+
+        const range = document.createRange();
+        range.setStart(target.firstChild, segment.index);
+        range.setEnd(target.firstChild, segment.index + segment.segment.length);
+        const highlight = new Highlight(range);
+        CSS.highlights.set("selected", highlight);
+      });
+    </script>
+  </body>
+</html>
